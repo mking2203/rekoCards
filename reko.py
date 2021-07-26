@@ -57,6 +57,9 @@ class Reko:
         # data palette starts after header
         start = 22
 
+        # reset color table
+        self.colorPalette = []
+
         # palette is RGB
         for c in range(colorsCount):
             cls = []
@@ -70,119 +73,109 @@ class Reko:
 
 # ---------------------------------- MAIN ----------------------------------
 
-# actual path
-actDir = pathlib.Path().resolve()
+def Loadfile(inputFile, outputPath):
 
-#create output folder
-output = os.path.join(actDir,'output')
-if not os.path.exists(output):
-    os.mkdir(output)
+    print('Open card file: ' + os.path.basename(inputFile))
 
-# delete old results
-for f in os.listdir(output):
-    if re.search('.tga', f):
-        os.remove(os.path.join(output, f))
-for f in os.listdir(output):
-    if re.search('.jpg', f):
-        os.remove(os.path.join(output, f))
+    # delete old results
+    for f in os.listdir(outputPath):
+        if re.search('.tga', f):
+            os.remove(os.path.join(outputPath, f))
+    for f in os.listdir(outputPath):
+        if re.search('.jpg', f):
+            os.remove(os.path.join(outputPath, f))
 
-# file to load
-pth = 'Aquarium.REKO'
+    f = open(inputFile,'rb')
+    data = f.read()
+    f.close()
 
-# working (4 bit color...)
-#pth = 'DragonsLair_ECS.REKO'
+    reko = Reko(data)
+    point = reko.startData
 
-f = open(pth,'rb')
-data = f.read()
-f.close()
+    for crd in range(reko.cardsCount):
 
-reko = Reko(data)
-point = reko.startData
+        bArr = []
 
-for crd in range(reko.cardsCount):
+        for l in range(reko.height):
 
-    bArr = []
+            # read bit by bit, highest first for each, then next bit...
+            old = []
+            new = []
 
-    for l in range(reko.height):
+            # copy data
+            for x in range(11 * reko.colorDeep):
+                old.append(reko.data[point])
+                point = point + 1
 
-        # read bit by bit, highest first for each, then next bit...
-        old = []
-        new = []
+            # new data
+            for x in range(reko.width):
+                new.append(0)
 
-        # copy data
-        for x in range(11 * reko.colorDeep):
-            old.append(reko.data[point])
-            point = point + 1
+            bit = 0
+            cnt = 0
 
-        # new data
-        for x in range(reko.width):
-            new.append(0)
+            for b in range(reko.colorDeep):
+                for dx in range(reko.width):
 
-        bit = 0
-        cnt = 0
+                    if bit == 0:
+                        bit = 128
+                    elif bit == 128:
+                        bit = 64
+                    elif bit == 64:
+                        bit = 32
+                    elif bit == 32:
+                        bit = 16
+                    elif bit == 16:
+                        bit = 8
+                    elif bit == 8:
+                        bit = 4
+                    elif bit == 4:
+                        bit = 2
+                    elif bit == 2:
+                        bit = 1
+                    elif bit == 1:
+                        bit = 128
+                        cnt = cnt + 1
 
-        for b in range(reko.colorDeep):
-            for dx in range(reko.width):
+                    if (old[cnt] & bit) != 0:
+                        new[dx] = new[dx] | pow(2,b)
 
-                if bit == 0:
-                    bit = 128
-                elif bit == 128:
-                    bit = 64
-                elif bit == 64:
-                    bit = 32
-                elif bit == 32:
-                    bit = 16
-                elif bit == 16:
-                    bit = 8
-                elif bit == 8:
-                    bit = 4
-                elif bit == 4:
-                    bit = 2
-                elif bit == 2:
-                    bit = 1
-                elif bit == 1:
-                    bit = 128
-                    cnt = cnt + 1
+            for i in range(reko.width):
 
-                if (old[cnt] & bit) != 0:
-                    new[dx] = new[dx] | pow(2,b)
+                if reko.HAM:
 
-        for i in range(reko.width):
+                    # HAM encoding
+                    v = int(new[i])
 
-            if reko.HAM:
+                    vm = (v & 0x3F) << 2
+                    m = (v & 0xC0) >> 6
 
-                # HAM encoding
-                v = int(new[i])
-
-                vm = (v & 0x3F) << 2
-                m = (v & 0xC0) >> 6
-
-                if i==0:
-                    aktCol = reko.colorPalette[v & 0x3F]
-                else:
-                    if m == 0:
+                    if i==0:
                         aktCol = reko.colorPalette[v & 0x3F]
-                    elif m == 1: # B
-                        aktCol[2] = vm
-                    elif m == 2: # R
-                        aktCol[0] = vm
-                    elif m == 3: # G
-                        aktCol[1] = vm
+                    else:
+                        if m == 0:
+                            aktCol = reko.colorPalette[v & 0x3F]
+                        elif m == 1: # B
+                            aktCol[2] = vm
+                        elif m == 2: # R
+                            aktCol[0] = vm
+                        elif m == 3: # G
+                            aktCol[1] = vm
 
-            else:
+                else:
 
-                # normal encoding
-                v = int(new[i])
-                aktCol = reko.colorPalette[v]
+                    # normal encoding
+                    v = int(new[i])
+                    aktCol = reko.colorPalette[v]
 
-            bArr.append(aktCol[2])
-            bArr.append(aktCol[1])
-            bArr.append(aktCol[0])
+                bArr.append(aktCol[2])
+                bArr.append(aktCol[1])
+                bArr.append(aktCol[0])
 
-    bb = bytes(bArr)
+        bb = bytes(bArr)
 
-    # write file
-    fileName = 'Card_' + str(crd + 1).zfill(2) +'.tga'
-    saveFile = os.path.join(output, fileName)
+        # write file
+        fileName = 'Card_' + str(crd + 1).zfill(2) +'.tga'
+        saveFile = os.path.join(outputPath, fileName)
 
-    TGA_File.writeFile(saveFile, bb, reko.width, reko.height)
+        TGA_File.writeFile(saveFile, bb, reko.width, reko.height)

@@ -128,6 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-.output/
+files2/
 *.tga
 *.jpg
+
+testSingleFile.py

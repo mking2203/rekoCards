@@ -5,7 +5,7 @@ import pathlib
 
 import TGA_File
 
-class PC:
+class PC16:
 
     data = []
     colorDeep = 0
@@ -46,6 +46,8 @@ class PC:
 
         point = self.startData
 
+        self.cards = []
+
         for crd in range(self.cardsCount):
 
             # skip size
@@ -72,42 +74,35 @@ class PC:
 
 # ---------------------------------- MAIN ----------------------------------
 
-# actual path
-actDir = pathlib.Path().resolve()
+def Loadfile(inputFile, outputPath):
 
-#create output folder
-output = os.path.join(actDir,'output')
-if not os.path.exists(output):
-    os.mkdir(output)
+    print('Open card file PC16: ' + os.path.basename(inputFile))
 
-# delete old results
-for f in os.listdir(output):
-    if re.search('.tga', f):
-        os.remove(os.path.join(output, f))
-for f in os.listdir(output):
-    if re.search('.jpg', f):
-        os.remove(os.path.join(output, f))
+    # delete old results
+    for f in os.listdir(outputPath):
+        if re.search('.tga', f):
+            os.remove(os.path.join(outputPath, f))
+    for f in os.listdir(outputPath):
+        if re.search('.jpg', f):
+            os.remove(os.path.join(outputPath, f))
 
-# file to load
-pth = 'TinTin.rkp'
+    # read data from file
+    f = open(inputFile,'rb')
+    data = f.read()
+    f.close()
 
-# read data from file
-f = open(pth,'rb')
-data = f.read()
-f.close()
+    # parse the  data
+    pcCard = PC16(data)
 
-# parse the  data
-pcCard = PC(data)
+    # generate TGA for the cards
+    cnt = 0
+    for crd in pcCard.cards:
 
-# generate TGA for the cards
-cnt = 0
-for crd in pcCard.cards:
+        # write file
+        fileName = 'Card_' + str(cnt + 1).zfill(2) +'.tga'
+        saveFile = os.path.join(outputPath, fileName)
 
-    # write file
-    fileName = 'Card_' + str(cnt + 1).zfill(2) +'.tga'
-    saveFile = os.path.join(output, fileName)
+        TGA_File.writeFile(saveFile, crd, pcCard.width, pcCard.height)
 
-    TGA_File.writeFile(saveFile, crd, pcCard.width, pcCard.height)
-
-    # next picture
-    cnt = cnt + 1
+        # next picture
+        cnt = cnt + 1

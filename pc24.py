@@ -2,13 +2,14 @@ import io
 import os
 import re
 import pathlib
+from sys import argv
 
 import JPG_File
 
 # this type of card sets contains JPG's. Since I did not find any documentation
 # it's just a reverse engineering
 
-class PC:
+class PC24:
 
     data = []
     colorDeep = 0
@@ -41,6 +42,8 @@ class PC:
         # read data, all images are JPG's
         start = self.startData
 
+        self.cards = []
+
         for crd in range(self.cardsCount):
 
             # 4 bytes for the length
@@ -58,48 +61,37 @@ class PC:
 
             self.cards.append(pic)
 
-
-
 # ---------------------------------- MAIN ----------------------------------
 
-# actual path
-actDir = pathlib.Path().resolve()
+def Loadfile(inputFile, outputPath):
 
-#create output folder
-output = os.path.join(actDir,'output')
-if not os.path.exists(output):
-    os.mkdir(output)
+    print('Open card file PC24: ' + os.path.basename(inputFile))
 
-# delete old results
-for f in os.listdir(output):
-    if re.search('.tga', f):
-        os.remove(os.path.join(output, f))
-for f in os.listdir(output):
-    if re.search('.jpg', f):
-        os.remove(os.path.join(output, f))
+    # delete old results
+    for f in os.listdir(outputPath):
+        if re.search('.tga', f):
+            os.remove(os.path.join(outputPath, f))
+    for f in os.listdir(outputPath):
+        if re.search('.jpg', f):
+            os.remove(os.path.join(outputPath, f))
 
-# read data from file
-pth = 'BorisCards1.rkp'
+    f = open(inputFile,'rb')
+    data = f.read()
+    f.close()
 
-f = open(pth,'rb')
-data = f.read()
-f.close()
+    # parse the  data
+    pcCard = PC24(data)
 
-# parse the  data
-pcCard = PC(data)
+    # generate JPG for the cards
+    cnt = 0
+    for crd in pcCard.cards:
 
-# generate JPG for the cards
-cnt = 0
-for crd in pcCard.cards:
+        # write file
+        fileName = 'Card_' + str(cnt + 1).zfill(2) +'.jpg'
+        saveFile = os.path.join(outputPath, fileName)
 
-    # write file
-    fileName = 'Card_' + str(cnt + 1).zfill(2) +'.jpg'
-    saveFile = os.path.join(output, fileName)
+        JPG_File.writeFile(saveFile, crd)
 
-    JPG_File.writeFile(saveFile, crd)
-
-    # next picture
-    cnt = cnt + 1
-
-
+        # next picture
+        cnt = cnt + 1
 
