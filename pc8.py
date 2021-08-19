@@ -72,9 +72,9 @@ class PC8:
                     # get color from table
                     v = colorPalette[v]
 
-                    r = ((v & 0x7C00) >> 10) << 3
+                    b = ((v & 0x7C00) >> 10) << 3
                     g = ((v & 0x03E0) >> 5) << 3
-                    b = ((v & 0x001F) << 3)
+                    r = ((v & 0x001F) << 3)
 
                     byArr.append(r)
                     byArr.append(g)
