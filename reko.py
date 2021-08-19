@@ -140,6 +140,7 @@ def Loadfile(inputFile, outputPath):
                     if (old[cnt] & bit) != 0:
                         new[dx] = new[dx] | pow(2,b)
 
+            aktCol = [0,0,0]
             for i in range(reko.width):
 
                 if reko.HAM:
@@ -151,15 +152,21 @@ def Loadfile(inputFile, outputPath):
                     m = (v & 0xC0) >> 6
 
                     if i==0:
-                        aktCol = reko.colorPalette[v & 0x3F]
+                        val = reko.colorPalette[v & 0x3F]
+                        aktCol[0] = val[0]
+                        aktCol[1] = val[1]
+                        aktCol[2] = val[2]
                     else:
                         if m == 0:
-                            aktCol = reko.colorPalette[v & 0x3F]
-                        elif m == 1: # B
+                            val = reko.colorPalette[v & 0x3F]
+                            aktCol[0] = val[0]
+                            aktCol[1] = val[1]
+                            aktCol[2] = val[2]
+                        elif m == 1: # Blue
                             aktCol[2] = vm
-                        elif m == 2: # R
+                        elif m == 2: # Red
                             aktCol[0] = vm
-                        elif m == 3: # G
+                        elif m == 3: # Green
                             aktCol[1] = vm
 
                 else:
@@ -168,9 +175,12 @@ def Loadfile(inputFile, outputPath):
                     v = int(new[i])
                     aktCol = reko.colorPalette[v]
 
-                bArr.append(aktCol[2])
-                bArr.append(aktCol[1])
                 bArr.append(aktCol[0])
+                bArr.append(aktCol[1])
+                bArr.append(aktCol[2])
+
+                #print (str(aktCol[0]) + ',' + str(aktCol[1]) + ',' + str(aktCol[2]))
+
 
         bb = bytes(bArr)
 
