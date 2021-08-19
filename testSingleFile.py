@@ -20,13 +20,10 @@ if not os.path.exists(output):
 
 fileDir = os.path.join(actDir, 'files')
 
-#reko.Loadfile(os.path.join(actDir, 'files', 'Aquarium.REKO') , output)
+reko.Loadfile(os.path.join(actDir, 'files', 'Aquarium.REKO') , output)
 #pc8.Loadfile(os.path.join(actDir, 'files', 'Dogs1.RKP') , output)
 #pc16.Loadfile(os.path.join(actDir, 'files', 'TinTin.RKP') , output)
-pc24.Loadfile(os.path.join(actDir, 'files', 'BorisCards1.rkp') , output)
-
-#reko.Loadfile(os.path.join(actDir, 'files2', 'Default.REKO') , output)
-#reko.Loadfile(os.path.join(actDir, 'files2', 'BB2B02.REKO') , output)
+#pc24.Loadfile(os.path.join(actDir, 'files', 'BorisCards1.rkp') , output)
 
 
 
