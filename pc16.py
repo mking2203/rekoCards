@@ -62,9 +62,9 @@ class PC16:
                     v = int(self.data[point + 1] * pow(2,8) + self.data[point])
                     point = point + 2
 
-                    b = ((v & 0x7C00) >> 10) << 3
+                    r = ((v & 0x7C00) >> 10) << 3
                     g = ((v & 0x03E0) >> 5) << 3
-                    r = ((v & 0x001F) << 3)
+                    b = ((v & 0x001F) << 3)
 
                     byArr.append(r)
                     byArr.append(g)
