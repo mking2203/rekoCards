@@ -4,6 +4,7 @@ import re
 import pathlib
 
 import TGA_File
+import BITMAP_File
 
 class PC16:
 
@@ -20,6 +21,12 @@ class PC16:
 
     cards = []
 
+    def toLong(self, start):
+        return self.data[start+3] * 2**24 + self.data[start+2] * 2**16 + self.data[start+1] * 2**8 + self.data[start]
+
+    def toInt(self, start):
+        return self.data[start+1] * 2**8 + self.data[start]
+
     def __init__(self, data):
 
         # header contains 22 bytes
@@ -29,11 +36,11 @@ class PC16:
         self.pc_id = self.data[:6].decode("utf-8") # PCREKO
         self.pc_id2 = self.data[6:7].decode("utf-8") # 0x00
 
-        self.bodySize = self.data[11] * pow(2,24) + self.data[10] * pow(2,16) + self.data[9] * pow(2,8) + self.data[8]
-        self.cardSize = self.data[15] * pow(2,24) + self.data[14] * pow(2,16) + self.data[13] * pow(2,8) + self.data[12]
+        self.bodySize = self.toLong(8)
+        self.cardSize =  self.toLong(12)
 
-        self.width = self.data[17] * pow(2,8) + self.data[16]
-        self.height = self.data[19] * pow(2,8) + self.data[18]
+        self.width = self.toInt(16)
+        self.height = self.toInt(18)
 
         self.colorDeep = self.data[20]
         self.cardsCount = self.data[21]
@@ -99,10 +106,12 @@ def Loadfile(inputFile, outputPath):
     for crd in pcCard.cards:
 
         # write file
-        fileName = 'Card_' + str(cnt + 1).zfill(2) +'.tga'
+        #fileName = 'Card_' + str(cnt + 1).zfill(2) +'.tga'
+        fileName = 'Card_' + str(cnt + 1).zfill(2) +'.bmp'
         saveFile = os.path.join(outputPath, fileName)
 
-        TGA_File.writeFile(saveFile, crd, pcCard.width, pcCard.height)
+        #TGA_File.writeFile(saveFile, crd, pcCard.width, pcCard.height)
+        BITMAP_File.writeFile(saveFile, crd, pcCard.width, pcCard.height)
 
         # next picture
         cnt = cnt + 1

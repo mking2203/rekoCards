@@ -16,11 +16,33 @@ class PC24:
     height = 0
     width = 0
     cardsCount = 0
+
+    creator = ''
+    mail = ''
+    website = ''
+    comment = ''
+    category = ''
+    date = ''
+
     pc_id = ''
 
     startData = 0
 
     cards = []
+
+    def toLong(self, start):
+        return self.data[start+3] * 2**24 + self.data[start+2] * 2**16 + self.data[start+1] * 2**8 + self.data[start]
+
+    def getString(self, data):
+        strData = ''
+
+        for b in data:
+            if (b != 0):
+                strData = strData + chr(b)
+            else:
+                break
+
+        return strData
 
     def __init__(self, data):
 
@@ -30,12 +52,26 @@ class PC24:
 
         self.pc_id = self.data[:5].decode("utf-8") # PCRKP
 
-        self.width = self.data[19] * pow(2,24) + self.data[18] * pow(2,16) + self.data[17] * pow(2,8) + self.data[16]
-        self.height = self.data[23] * pow(2,24) + self.data[22] * pow(2,16) + self.data[21] * pow(2,8) + self.data[20]
-        self.colorDeep = self.data[27] * pow(2,24) + self.data[26] * pow(2,16) + self.data[25] * pow(2,8) + self.data[24]
-        self.cardsCount = self.data[31] * pow(2,24) + self.data[30] * pow(2,16) + self.data[29] * pow(2,8) + self.data[28]
+        self.width = self.toLong(16)
+        self.height = self.toLong(20)
+        self.colorDeep = self.toLong(24)
+        self.cardsCount = self.toLong(28)
+
+        a = 36
+        self.creator = self.getString(data[a:a+255])
+        a = a + 256
+        self.mail = self.getString(data[a:a+255])
+        a = a + 256
+        self.website = self.getString(data[a:a+255])
+        a = a + 256
+        self.comment = self.getString(data[a:a+255])
+        a = a + 256
+        self.category = self.getString(data[a:a+19])
+        a = a + 20
+        self.date = self.getString(data[a:a+20])
 
         print('PC Cardset: ' + str(self.cardsCount) + ' cards / ' + str(pow (2,self.colorDeep)) + ' colors')
+        print('Creator: ' + self.creator)
 
         self.startData = 0x450 # always ??
 
@@ -47,7 +83,7 @@ class PC24:
         for crd in range(self.cardsCount):
 
             # 4 bytes for the length
-            leng = data[start+3] * pow(2,24) + data[start+2] * pow(2,16) + data[start+1] * pow(2,8) + data[start]
+            leng = self.toLong(start)
 
             start = start + 4
             ende = start + leng

@@ -4,6 +4,7 @@ import re
 import pathlib
 
 import TGA_File
+import BITMAP_File
 
 class PC8:
 
@@ -109,10 +110,12 @@ def Loadfile(inputFile, outputPath):
     for crd in pcCard.cards:
 
         # write file
-        fileName = 'Card_' + str(cnt + 1).zfill(2) +'.tga'
+        #fileName = 'Card_' + str(cnt + 1).zfill(2) +'.tga'
+        fileName = 'Card_' + str(cnt + 1).zfill(2) +'.jpg'
         saveFile = os.path.join(outputPath, fileName)
 
-        TGA_File.writeFile(saveFile, crd, pcCard.width, pcCard.height)
+        #TGA_File.writeFile(saveFile, crd, pcCard.width, pcCard.height)
+        BITMAP_File.writeFile(saveFile, crd, pcCard.width, pcCard.height)
 
         # next picture
         cnt = cnt + 1

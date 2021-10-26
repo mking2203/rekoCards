@@ -4,6 +4,7 @@ import re
 import pathlib
 
 import TGA_File
+import BITMAP_File
 
 class Reko:
 
@@ -182,10 +183,12 @@ def Loadfile(inputFile, outputPath):
                 #print (str(aktCol[0]) + ',' + str(aktCol[1]) + ',' + str(aktCol[2]))
 
 
-        bb = bytes(bArr)
+        #bb = bytes(bArr)
 
         # write file
-        fileName = 'Card_' + str(crd + 1).zfill(2) +'.tga'
+        #fileName = 'Card_' + str(crd + 1).zfill(2) +'.tga'
+        fileName = 'Card_' + str(crd + 1).zfill(2) +'.jpg'
         saveFile = os.path.join(outputPath, fileName)
 
-        TGA_File.writeFile(saveFile, bb, reko.width, reko.height)
+        #TGA_File.writeFile(saveFile, bb, reko.width, reko.height)
+        BITMAP_File.writeFile(saveFile, bArr, reko.width, reko.height)
