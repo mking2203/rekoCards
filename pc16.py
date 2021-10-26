@@ -66,7 +66,7 @@ class PC16:
             for l in range(self.height):
                 for i in range(self.width):
 
-                    v = int(self.data[point + 1] * pow(2,8) + self.data[point])
+                    v = int(self.toInt(point))
                     point = point + 2
 
                     r = ((v & 0x7C00) >> 10) << 3
@@ -92,6 +92,9 @@ def Loadfile(inputFile, outputPath):
     for f in os.listdir(outputPath):
         if re.search('.jpg', f):
             os.remove(os.path.join(outputPath, f))
+    for f in os.listdir(outputPath):
+        if re.search('.bmp', f):
+            os.remove(os.path.join(outputPath, f))
 
     # read data from file
     f = open(inputFile,'rb')
@@ -106,11 +109,9 @@ def Loadfile(inputFile, outputPath):
     for crd in pcCard.cards:
 
         # write file
-        #fileName = 'Card_' + str(cnt + 1).zfill(2) +'.tga'
         fileName = 'Card_' + str(cnt + 1).zfill(2) +'.bmp'
         saveFile = os.path.join(outputPath, fileName)
 
-        #TGA_File.writeFile(saveFile, crd, pcCard.width, pcCard.height)
         BITMAP_File.writeFile(saveFile, crd, pcCard.width, pcCard.height)
 
         # next picture

@@ -131,4 +131,5 @@ dmypy.json
 files2/
 *.tga
 *.jpg
+*.bmp
 

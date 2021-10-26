@@ -6,8 +6,7 @@ from sys import argv
 
 import JPG_File
 
-# this type of card sets contains JPG's. Since I did not find any documentation
-# it's just a reverse engineering
+# this type of card sets contains JPG's
 
 class PC24:
 
@@ -109,6 +108,9 @@ def Loadfile(inputFile, outputPath):
             os.remove(os.path.join(outputPath, f))
     for f in os.listdir(outputPath):
         if re.search('.jpg', f):
+            os.remove(os.path.join(outputPath, f))
+    for f in os.listdir(outputPath):
+        if re.search('.bmp', f):
             os.remove(os.path.join(outputPath, f))
 
     f = open(inputFile,'rb')

@@ -85,6 +85,9 @@ def Loadfile(inputFile, outputPath):
     for f in os.listdir(outputPath):
         if re.search('.jpg', f):
             os.remove(os.path.join(outputPath, f))
+    for f in os.listdir(outputPath):
+        if re.search('.bmp', f):
+            os.remove(os.path.join(outputPath, f))
 
     f = open(inputFile,'rb')
     data = f.read()
@@ -182,13 +185,10 @@ def Loadfile(inputFile, outputPath):
 
                 #print (str(aktCol[0]) + ',' + str(aktCol[1]) + ',' + str(aktCol[2]))
 
-
         #bb = bytes(bArr)
 
         # write file
-        #fileName = 'Card_' + str(crd + 1).zfill(2) +'.tga'
-        fileName = 'Card_' + str(crd + 1).zfill(2) +'.jpg'
+        fileName = 'Card_' + str(crd + 1).zfill(2) +'.bmp'
         saveFile = os.path.join(outputPath, fileName)
 
-        #TGA_File.writeFile(saveFile, bb, reko.width, reko.height)
         BITMAP_File.writeFile(saveFile, bArr, reko.width, reko.height)
