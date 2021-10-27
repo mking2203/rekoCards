@@ -2,7 +2,6 @@ import io
 import os
 import re
 import pathlib
-from sys import argv
 
 import JPG_File
 

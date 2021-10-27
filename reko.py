@@ -1,5 +1,6 @@
 import io
 import os
+import re
 import pathlib
 
 import BITMAP_File
