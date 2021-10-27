@@ -15,6 +15,8 @@ class PC24:
     height = 0
     width = 0
     cardsCount = 0
+    bodySize = 0
+    cardSize = 0
 
     creator = ''
     mail = ''
@@ -50,6 +52,9 @@ class PC24:
         self.data = data
 
         self.pc_id = self.data[:5].decode("utf-8") # PCRKP
+
+        self.cardSize = self.toLong(8)
+        self.bodySize = self.toLong(12)
 
         self.width = self.toLong(16)
         self.height = self.toLong(20)

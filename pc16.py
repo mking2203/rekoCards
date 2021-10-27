@@ -1,9 +1,7 @@
 import io
 import os
-import re
 import pathlib
 
-import TGA_File
 import BITMAP_File
 
 class PC16:
@@ -36,8 +34,8 @@ class PC16:
         self.pc_id = self.data[:6].decode("utf-8") # PCREKO
         self.pc_id2 = self.data[6:7].decode("utf-8") # 0x00
 
-        self.bodySize = self.toLong(8)
-        self.cardSize =  self.toLong(12)
+        self.cardSize = self.toLong(8)
+        self.bodySize =  self.toLong(12)
 
         self.width = self.toInt(16)
         self.height = self.toInt(18)

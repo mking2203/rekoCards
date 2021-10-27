@@ -1,0 +1,206 @@
+Here the REKO data format for all which want to know it. It should be
+helpful if you want to support REKO cardsets in your own card games,
+which is always a good idea I think.
+
+A short note:
+ULONG is unsigned 32 bit, UWORD is unsigned 16 bit and UBYTE is unsigned
+8 bit data.
+
+Amiga cardset structure:
+************************
+
+The file consists of one information structure and the data for every card.
+
+struct RekoHeader /* REKO file header */
+{
+  UBYTE rh_ID[4];
+  ULONG rh_BodySize;	/* Motorola big endian format */
+  ULONG rh_CardSize;	/* Motorola big endian format */
+  UWORD rh_Height;	/* Motorola big endian format */
+  UWORD rh_Width;	/* Motorola big endian format */
+  ULONG rh_ModeID;	/* Motorola big endian format */
+  UBYTE rh_Depth;
+  UBYTE rh_CardsCnt;
+};
+
+There exists two big different card formats which are normal and HAM cards.
+
+1) Normal card files:
+  rh_ID			always "REKO"
+  rh_BodySize		rh_CardSize*rh_CardsCnt+(1<<rh_Depth)*3
+			FileSize-sizeof(struct RekoHeader)
+  rh_CardSize		rh_Width * rh_Height * rh_Depth / 8
+  rh_Width		88
+  rh_ModeID		screen mode ID (HAM_KEY 0x800 indicates HAM mode)
+  rh_Height		130
+  rh_Depth		often 3,4,5,7 or 8
+  rh_CardsCnt		normally 55, 59 or 68
+
+First a palette is stored, which has 2^rh_Depth entries. Every entry
+consists of 3 UBYTE values storing red, green and blue color (in that
+order!)
+
+The header is now followed by rh_CardsCnt cards of following format.
+
+The card's bitmaps are stored line for line. This means first
+comes the line with least significant bit (bitmap one) and last the
+line with most significant bit (last bitmap). After that line two of
+bitmap one to line two of last bitmap and it stops with last line of
+last bitmap.
+  
+2) HAM card files:
+  rh_ID			always "REKO"
+  rh_BodySize		rh_CardSize*rh_CardsCnt+(1<<rh_Depth-2)*3
+			FileSize-sizeof(struct RekoHeader)
+  rh_CardSize		rh_Width * rh_Height * rh_Depth / 8
+  rh_Width		88
+  rh_ModeID		screen mode ID (HAM_KEY 0x800 indicates HAM mode)
+  rh_Height		130
+  rh_Depth		8 or 6
+  rh_CardsCnt		normally 55, 59 or 68
+
+First a palette is stored, which has 2^(rh_Depth-2) entries. Every
+entry consists of 3 UBYTE values storing red, green and blue color
+(in that order!)
+
+The header is now followed by rh_CardsCnt cards of following format.
+
+The card's bitmaps are stored line for line. This means first
+comes the line with least significant bit (bitmap one) and last the
+line with most significant bit (last bitmap). After that line two of
+bitmap one to line two of last bitmap and it stops with last line of
+last bitmap.
+
+The difference is this rh_Depth-2! HAM mode uses 2 bitplanes for
+"Hold And Modify". The 2 most significant bits have a special
+meaning. They allow 4 possibilities (bit numbers for HAM8!):
+ value 0 The pixel color is taken from palette. The bits 0..5
+         are the index in palette table.
+ value 1 The color is taken from previous pixel in this line and
+         the blue value is replaced by the bits 0..5 (shift 2 bits
+         to left).
+ value 2 The color is taken from previous pixel in this line and
+         the red value is replaced by the bits 0..5 (shift 2 bits
+         to left).
+ value 3 The color is taken from previous pixel in this line and
+         the green value is replaced by the bits 0..5 (shift 2 bits
+         to left).
+For HAM6 the color bits are 0..3 and you need to shift 4 bits to left
+to get the final value.
+
+As there exists no previous pixel at first position in line, the
+previous pixel in that case gets background color (color register 0).
+This restarts every line!
+
+3) order of cards:
+card 1		REKO production card
+card 2		empty card
+card 3		back of the cards
+cards 4..7	aces, all cards in order clubs, diamonds, hearts, spades
+cards 8..55	4 cards of 1,2,3,4,5,6,7,8,9,10,J,Q,K
+cards 56..59	4 stack background cards (left to right)
+cards 60..68	preferences cards
+		General, Prefs, Resolution, Select, Miscellaneous,
+		Music, Level, Confirm, About
+
+PC cardset structure:
+*********************
+
+The file consists of one information structure and the data for every card.
+
+struct PCRekoHeader
+{
+  UBYTE rh_ID[6];
+  UBYTE rh_ID2[2];
+  ULONG rh_BodySize;	/* Intel little endian format */
+  ULONG rh_CardSize;	/* Intel little endian format */
+  UWORD rh_Width;	/* Intel little endian format */
+  UWORD rh_Height;	/* Intel little endian format */
+  UBYTE rh_Depth;
+  UBYTE rh_CardsCnt;
+};
+
+There exists the two different file types 8 bit dynamic palette or 16bit.
+Note that width, height, cardscount and thus cardsize or bodysize may be
+different, but the calculation rules are correct.
+
+1) Data of 8bit dynamic palette files:
+  rh_ID			always "PCREKO"
+  rh_ID2		"D "
+  rh_BodySize		681492
+			(rh_CardSize+512+4)*rh_CardsCnt
+			FileSize-sizeof(struct PCRekoHeader) = 681514-22
+  rh_CardSize		11440
+  			rh_Width * rh_Height * rh_Depth / 8
+  rh_Width		88
+  rh_Height		130
+  rh_Depth		8
+  rh_CardsCnt		57
+
+The header is now followed by rh_CardsCnt cards of following format
+
+struct PCCard8
+{
+  UWORD c_Width;	/* Intel little endian format */
+  UWORD c_Height;	/* Intel little endian format */
+  UWORD c_Colors[256];	/* Intel little endian format */
+  UBYTE c_Data[];
+}
+
+The c_Width and c_Height repeat the rh_Width and rh_Height information
+lowered by 1!
+
+The c_Data field holds rh_Width*rh_Height bytes which refer to a color
+in the c_Colors table. The c_Colors table contains 15/16bit color data
+in a format described below.
+
+2) Data of 16bit files:
+  rh_ID			always "PCREKO"
+  rh_ID2		"\0\0"
+  rh_BodySize		1304388
+			(rh_CardSize+4)*rh_CardsCnt
+			FileSize-sizeof(struct PCRekoHeader) = 1304410-22
+  rh_CardSize		22880
+  			rh_Width * rh_Height * rh_Depth / 8
+  rh_Width		88
+  rh_Height		130
+  rh_Depth		16
+  rh_CardsCnt		57
+
+The header is now followed by rh_CardsCnt cards of following format
+
+struct PCCard16
+{
+  UWORD c_Width;	/* Intel little endian format */
+  UWORD c_Height;	/* Intel little endian format */
+  UWORD c_Data[];	/* Intel little endian format */
+}
+
+The c_Width and c_Height repeat the rh_Width and rh_Height information
+lowered by 1!
+
+The c_Data field holds rh_Width*rh_Height words of 15/16bit color data
+in a format described below.
+
+3) The picture data format:
+The color information is 15 bit data stored in 16 bit. This means the most
+significant bit is unused. The data is stored line for line in little
+endian Intel format starting with top left edge to bottom right edge. This
+is normally called chunky format.
+
+Bit  0.. 4	blue value
+Bit  5.. 9	green value
+Bit 10..14      red value
+
+To get 8 bit RGB data, all these values must be shifted 3 bits to the left.
+
+4) order of cards:
+card 1		back of the cards
+cards 2..5	aces, all cards in order clubs, diamonds, hearts, spades
+cards 6..53	4 cards of 1,2,3,4,5,6,7,8,9,10,J,Q,K
+cards 54..57	4 stack background cards (left to right)
+
+Dirk Stöcker <stoecker@epost.de>
+
+2nd January 2001
+

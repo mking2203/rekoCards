@@ -1,9 +1,7 @@
 import io
 import os
-import re
 import pathlib
 
-import TGA_File
 import BITMAP_File
 
 class PC8:
@@ -115,7 +113,7 @@ def Loadfile(inputFile, outputPath):
     # parse the  data
     pcCard = PC8(data)
 
-    # generate TGA for the cards
+    # generate gfx for the cards
     cnt = 0
     for crd in pcCard.cards:
 
